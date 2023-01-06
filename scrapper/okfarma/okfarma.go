@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -12,6 +13,11 @@ import (
 )
 
 const Domain string = "okfarma.es"
+
+type WaitGroupCount struct {
+	sync.WaitGroup
+	count int32
+}
 
 func Scrap(ref *firestore.CollectionRef) {
 
@@ -22,7 +28,7 @@ func Scrap(ref *firestore.CollectionRef) {
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
 	)
-	var wg sync.WaitGroup
+	var wg WaitGroupCount
 
 	c.OnHTML("#product_list", func(h *colly.HTMLElement) {
 		fmt.Println("Product List")
@@ -33,10 +39,13 @@ func Scrap(ref *firestore.CollectionRef) {
 			pageItem.Website = Domain
 			pageItem.Url = e.ChildAttr(".product-image-container a", "href")
 			wg.Add(1)
-			scrapDetailsPage(&item, &pageItem, &wg)
+			go scrapDetailsPage(&item, &pageItem, &wg)
 			item.PageItem = append(item.PageItem, pageItem)
 			items = append(items, item)
-			time.Sleep(50 * time.Millisecond)
+			count := wg.GetCount()
+			fmt.Printf("Count %v\n", count)
+			time.Sleep(time.Duration(count) * 100 * time.Millisecond)
+
 		})
 	})
 
@@ -49,7 +58,7 @@ func Scrap(ref *firestore.CollectionRef) {
 
 }
 
-func scrapDetailsPage(item *Item, pageItem *PageItem, wg *sync.WaitGroup) {
+func scrapDetailsPage(item *Item, pageItem *PageItem, wg *WaitGroupCount) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)
@@ -76,4 +85,18 @@ func buildPageUrl() string {
 
 	url := fmt.Sprintf("https://%v/medicamentos?id_category=3&n=1192", Domain)
 	return url
+}
+
+func (wg *WaitGroupCount) Add(delta int) {
+	atomic.AddInt32(&wg.count, int32(delta))
+	wg.WaitGroup.Add(delta)
+}
+
+func (wg *WaitGroupCount) Done() {
+	atomic.AddInt32(&wg.count, -1)
+	wg.WaitGroup.Done()
+}
+
+func (wg *WaitGroupCount) GetCount() int {
+	return int(atomic.LoadInt32(&wg.count))
 }
