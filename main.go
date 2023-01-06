@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	scrapper "github.com/cavitedev/go_tuto/scrapper"
+
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/option"
@@ -13,11 +15,10 @@ import (
 var client *firestore.Client
 var ctx context.Context
 
-var domain string = "www.farmaciaalbacete.es"
+var domain string = "okfarma.es"
 
 func main() {
 
-	fmt.Println("GO")
 	var err error
 
 	ctx = context.Background()
@@ -33,15 +34,17 @@ func main() {
 	}
 	defer client.Close()
 
+	fmt.Println("GO")
 	ref := client.Collection("products")
+	scrapper.Scrap(domain, ref)
 
-	_, _, err = ref.Add(ctx, map[string]interface{}{
-		"first": "Ada",
-		"last":  "Lovelace",
-		"born":  1815,
-	})
-	if err != nil {
-		log.Fatalf("Failed adding alovelace: %v", err)
-	}
+	// _, _, err = ref.Add(ctx, map[string]interface{}{
+	// 	"first": "Ada",
+	// 	"last":  "Lovelace",
+	// 	"born":  1815,
+	// })
+	// if err != nil {
+	// 	log.Fatalf("Failed adding alovelace: %v", err)
+	// }
 
 }
