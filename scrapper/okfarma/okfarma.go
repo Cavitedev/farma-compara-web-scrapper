@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	. "github.com/cavitedev/go_tuto/scrapper/types"
@@ -11,8 +12,6 @@ import (
 )
 
 const Domain string = "okfarma.es"
-
-var page int = 0
 
 func Scrap(ref *firestore.CollectionRef) {
 
@@ -30,12 +29,14 @@ func Scrap(ref *firestore.CollectionRef) {
 
 		h.ForEach(".product-container", func(_ int, e *colly.HTMLElement) {
 			item := Item{}
-			item.Name = e.ChildText(".product-name")
-			item.Price = e.ChildText(".price")
-			item.Url = e.ChildAttr(".product-image-container a", "href")
+			pageItem := PageItem{}
+			pageItem.Website = Domain
+			pageItem.Url = e.ChildAttr(".product-image-container a", "href")
 			wg.Add(1)
-			scrapDetailsPage(item.Url, &item, &wg)
+			scrapDetailsPage(&item, &pageItem, &wg)
+			item.PageItem = append(item.PageItem, pageItem)
 			items = append(items, item)
+			time.Sleep(50 * time.Millisecond)
 		})
 	})
 
@@ -48,7 +49,7 @@ func Scrap(ref *firestore.CollectionRef) {
 
 }
 
-func scrapDetailsPage(url string, item *Item, wg *sync.WaitGroup) {
+func scrapDetailsPage(item *Item, pageItem *PageItem, wg *sync.WaitGroup) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)
@@ -58,16 +59,21 @@ func scrapDetailsPage(url string, item *Item, wg *sync.WaitGroup) {
 	})
 
 	c.OnHTML("div #center_column", func(h *colly.HTMLElement) {
-
-		item.Image = h.ChildAttr("#bigpic", "src")
+		currentTime := time.Now()
+		pageItem.LastUpdate = currentTime
+		pageItem.Image = h.ChildAttr("#bigpic", "src")
+		pageItem.Name = h.ChildText("h1.product-name")
+		pageItem.Price = h.ChildText("#our_price_display")
+		pageItem.Available = h.ChildText("#availability_value span") != "Este producto ya no está disponible"
+		item.Ref = h.ChildAttr("#product_reference>span", "content")
 		wg.Done()
 	})
 
-	c.Visit(url)
+	c.Visit(pageItem.Url)
 }
 
 func buildPageUrl() string {
-	page++
-	url := fmt.Sprintf("https://%v/medicamentos#/page-%d", Domain, page)
+
+	url := fmt.Sprintf("https://%v/medicamentos?id_category=3&n=1192", Domain)
 	return url
 }
