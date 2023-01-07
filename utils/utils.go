@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-func SpanishNumberStrToNumber(str string) float32 {
+func SpanishNumberStrToNumber(str string) float64 {
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 	var incomingNumber string = re.FindString(str)
 	var numberAmerican string = strings.Replace(incomingNumber, ",", ".", -1)
-	priceNum, err := strconv.ParseFloat(numberAmerican, 32)
+	priceNum, err := strconv.ParseFloat(numberAmerican, 64)
 	if err != nil {
 		log.Println("Error parsing " + str)
 	}
 
-	return float32(priceNum)
+	return priceNum
 }

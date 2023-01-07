@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/cavitedev/go_tuto/firestore_utils"
 	. "github.com/cavitedev/go_tuto/scrapper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
@@ -41,6 +42,7 @@ func Scrap(ref *firestore.CollectionRef) {
 			scrapDetailsPage(&item, &pageItem)
 			item.PageItem = append(item.PageItem, pageItem)
 			items = append(items, item)
+			firestore_utils.UpdateItem(item, ref)
 			time.Sleep(50 * time.Millisecond)
 
 		})

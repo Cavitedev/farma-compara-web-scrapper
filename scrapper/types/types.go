@@ -3,16 +3,16 @@ package types
 import "time"
 
 type Item struct {
-	Ref      string     `json:"ref"`
-	PageItem []PageItem `json:"page_item"`
+	Ref      string     `json:"ref" firestore:"ref"`
+	PageItem []PageItem `json:"page_item" firestore:"page_item"`
 }
 
 type PageItem struct {
-	Website    string    `json:"website"`
-	Name       string    `json:"name"`
-	Price      float32   `json:"price"`
-	Image      string    `json:"image"`
-	Url        string    `json:"url"`
-	Available  bool      `json:"available"`
-	LastUpdate time.Time `json:"last_update"`
+	Website    string    `json:"website" firestore:"website,omitempty"`
+	Name       string    `json:"name" firestore:"name,omitempty"`
+	Price      float64   `json:"price" firestore:"price"`
+	Image      string    `json:"image" firestore:"image,omitempty"`
+	Url        string    `json:"url" firestore:"url"`
+	Available  bool      `json:"available" firestore:"available"`
+	LastUpdate time.Time `json:"last_update" firestore:"last_update"`
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	// scrapper "github.com/cavitedev/go_tuto/scrapper"
-
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/cavitedev/go_tuto/scrapper"
@@ -36,7 +34,7 @@ func main() {
 	defer client.Close()
 
 	fmt.Println("GO")
-	ref := client.Collection("products")
+	ref := client.Collection("items")
 	scrapper.Scrap(domain, ref)
 
 	// _, _, err = ref.Add(ctx, map[string]interface{}{
