@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -16,14 +15,9 @@ import (
 
 const Domain string = "okfarma.es"
 
-type WaitGroupCount struct {
-	sync.WaitGroup
-	count int32
-}
-
 func Scrap(ref *firestore.CollectionRef) {
 
-	fmt.Println(Domain)
+	log.Println(Domain)
 
 	items := []Item{}
 	c := colly.NewCollector(
@@ -32,19 +26,20 @@ func Scrap(ref *firestore.CollectionRef) {
 	)
 
 	c.OnHTML("#product_list", func(h *colly.HTMLElement) {
-		fmt.Println("Product List")
+		log.Println("Product List")
 
 		h.ForEach(".product-container", func(_ int, e *colly.HTMLElement) {
 			item := Item{}
-			pageItem := PageItem{}
-			pageItem.Website = Domain
+			pageItem := WebsiteItem{}
 			pageItem.Url = e.ChildAttr(".product-image-container a", "href")
 			scrapDetailsPage(&item, &pageItem)
-			item.PageItem = append(item.PageItem, pageItem)
+			if item.WebsiteItems == nil {
+				item.WebsiteItems = make(map[string]WebsiteItem)
+			}
+			item.WebsiteItems[Domain] = pageItem
 			items = append(items, item)
 			firestore_utils.UpdateItem(item, ref)
 			time.Sleep(50 * time.Millisecond)
-
 		})
 	})
 
@@ -52,11 +47,11 @@ func Scrap(ref *firestore.CollectionRef) {
 	c.Visit(url)
 
 	bytes, _ := json.Marshal(items)
-	fmt.Printf("%+v\n", string(bytes))
+	log.Printf("%+v\n", string(bytes))
 
 }
 
-func scrapDetailsPage(item *Item, pageItem *PageItem) {
+func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)

@@ -3,12 +3,11 @@ package types
 import "time"
 
 type Item struct {
-	Ref      string     `json:"ref" firestore:"ref"`
-	PageItem []PageItem `json:"page_item" firestore:"page_item"`
+	Ref          string                 `json:"ref" firestore:"ref"`
+	WebsiteItems map[string]WebsiteItem `json:"website_items" firestore:"website_items"`
 }
 
-type PageItem struct {
-	Website    string    `json:"website" firestore:"website,omitempty"`
+type WebsiteItem struct {
 	Name       string    `json:"name" firestore:"name,omitempty"`
 	Price      float64   `json:"price" firestore:"price"`
 	Image      string    `json:"image" firestore:"image,omitempty"`

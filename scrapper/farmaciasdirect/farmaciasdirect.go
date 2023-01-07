@@ -1,9 +1,15 @@
 package farmaciasdirect
 
-import "fmt"
+import (
+	"log"
 
-func Scrap() {
+	"cloud.google.com/go/firestore"
+)
 
-	fmt.Println("www.farmaciasdirect.com")
+const Domain string = "www.farmaciasdirect.com"
+
+func Scrap(ref *firestore.CollectionRef) {
+
+	log.Println(Domain)
 
 }

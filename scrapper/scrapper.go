@@ -1,7 +1,7 @@
 package scrapper
 
 import (
-	"fmt"
+	"log"
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/scrapper/farmaciasdirect"
@@ -10,12 +10,12 @@ import (
 
 func Scrap(website string, ref *firestore.CollectionRef) {
 
-	fmt.Println("Hola scrapper")
+	log.Println("Hola scrapper")
 
 	if website == okfarma.Domain {
 		okfarma.Scrap(ref)
-	} else if website == "www.farmaciasdirect.com" {
-		farmaciasdirect.Scrap()
+	} else if website == farmaciasdirect.Domain {
+		farmaciasdirect.Scrap(ref)
 	}
 
 }

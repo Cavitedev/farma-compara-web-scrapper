@@ -21,7 +21,7 @@ func main() {
 	var err error
 
 	ctx = context.Background()
-	sa := option.WithCredentialsFile("secrets/functions-sa.json")
+	sa := option.WithCredentialsFile("secrets/firestore-sa.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
@@ -36,14 +36,5 @@ func main() {
 	fmt.Println("GO")
 	ref := client.Collection("items")
 	scrapper.Scrap(domain, ref)
-
-	// _, _, err = ref.Add(ctx, map[string]interface{}{
-	// 	"first": "Ada",
-	// 	"last":  "Lovelace",
-	// 	"born":  1815,
-	// })
-	// if err != nil {
-	// 	log.Fatalf("Failed adding alovelace: %v", err)
-	// }
 
 }

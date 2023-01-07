@@ -19,6 +19,6 @@ func UpdateItem(item Item, col *firestore.CollectionRef) {
 	_, err := doc.Set(ctx, m, firestore.MergeAll)
 
 	if err != nil {
-		log.Panicf("Could not insert %v\n", item)
+		log.Panicf("Error: %v Could not insert %v\n", err, item)
 	}
 }
