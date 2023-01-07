@@ -14,7 +14,7 @@ import (
 var client *firestore.Client
 var ctx context.Context
 
-var domain string = "okfarma.es"
+var domain string = "www.farmaciasdirect.com"
 
 func main() {
 

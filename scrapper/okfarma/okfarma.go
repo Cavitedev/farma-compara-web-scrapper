@@ -67,7 +67,7 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 		pageItem.Name = h.ChildText("h1.product-name")
 
 		price := h.ChildText("#our_price_display")
-		pageItem.Price = utils.SpanishNumberStrToNumber(price)
+		pageItem.Price = utils.ParseSpanishNumberStrToNumber(price)
 		pageItem.Available = h.ChildText("#availability_value span") != "Este producto ya no está disponible"
 		item.Ref = h.ChildAttr("#product_reference>span", "content")
 	})

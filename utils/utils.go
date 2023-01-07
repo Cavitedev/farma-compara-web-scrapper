@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func SpanishNumberStrToNumber(str string) float64 {
+func ParseSpanishNumberStrToNumber(str string) float64 {
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 	var incomingNumber string = re.FindString(str)
 	var numberAmerican string = strings.Replace(incomingNumber, ",", ".", -1)
