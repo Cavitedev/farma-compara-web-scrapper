@@ -3,11 +3,13 @@ package okfarma
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
 	"cloud.google.com/go/firestore"
 	. "github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -57,7 +59,7 @@ func scrapDetailsPage(item *Item, pageItem *PageItem) {
 		colly.AllowedDomains(Domain),
 	)
 	c.OnResponse(func(r *colly.Response) {
-		fmt.Println("Visited", r.Request.URL)
+		log.Println("Visited", r.Request.URL)
 
 	})
 
@@ -66,7 +68,9 @@ func scrapDetailsPage(item *Item, pageItem *PageItem) {
 		pageItem.LastUpdate = currentTime
 		pageItem.Image = h.ChildAttr("#bigpic", "src")
 		pageItem.Name = h.ChildText("h1.product-name")
-		pageItem.Price = h.ChildText("#our_price_display")
+
+		price := h.ChildText("#our_price_display")
+		pageItem.Price = utils.SpanishNumberStrToNumber(price)
 		pageItem.Available = h.ChildText("#availability_value span") != "Este producto ya no está disponible"
 		item.Ref = h.ChildAttr("#product_reference>span", "content")
 	})

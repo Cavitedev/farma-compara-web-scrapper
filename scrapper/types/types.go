@@ -10,7 +10,7 @@ type Item struct {
 type PageItem struct {
 	Website    string    `json:"website"`
 	Name       string    `json:"name"`
-	Price      string    `json:"price"`
+	Price      float32   `json:"price"`
 	Image      string    `json:"image"`
 	Url        string    `json:"url"`
 	Available  bool      `json:"available"`
