@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -28,7 +27,6 @@ func Scrap(ref *firestore.CollectionRef) {
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
 	)
-	var wg WaitGroupCount
 
 	c.OnHTML("#product_list", func(h *colly.HTMLElement) {
 		fmt.Println("Product List")
@@ -38,27 +36,23 @@ func Scrap(ref *firestore.CollectionRef) {
 			pageItem := PageItem{}
 			pageItem.Website = Domain
 			pageItem.Url = e.ChildAttr(".product-image-container a", "href")
-			wg.Add(1)
-			go scrapDetailsPage(&item, &pageItem, &wg)
+			scrapDetailsPage(&item, &pageItem)
 			item.PageItem = append(item.PageItem, pageItem)
 			items = append(items, item)
-			count := wg.GetCount()
-			fmt.Printf("Count %v\n", count)
-			time.Sleep(time.Duration(count) * 100 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 
 		})
 	})
 
 	url := buildPageUrl()
 	c.Visit(url)
-	wg.Wait()
 
 	bytes, _ := json.Marshal(items)
 	fmt.Printf("%+v\n", string(bytes))
 
 }
 
-func scrapDetailsPage(item *Item, pageItem *PageItem, wg *WaitGroupCount) {
+func scrapDetailsPage(item *Item, pageItem *PageItem) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)
@@ -75,7 +69,6 @@ func scrapDetailsPage(item *Item, pageItem *PageItem, wg *WaitGroupCount) {
 		pageItem.Price = h.ChildText("#our_price_display")
 		pageItem.Available = h.ChildText("#availability_value span") != "Este producto ya no está disponible"
 		item.Ref = h.ChildAttr("#product_reference>span", "content")
-		wg.Done()
 	})
 
 	c.Visit(pageItem.Url)
@@ -83,20 +76,6 @@ func scrapDetailsPage(item *Item, pageItem *PageItem, wg *WaitGroupCount) {
 
 func buildPageUrl() string {
 
-	url := fmt.Sprintf("https://%v/medicamentos?id_category=3&n=1192", Domain)
+	url := fmt.Sprintf("https://%v/medicamentos", Domain)
 	return url
-}
-
-func (wg *WaitGroupCount) Add(delta int) {
-	atomic.AddInt32(&wg.count, int32(delta))
-	wg.WaitGroup.Add(delta)
-}
-
-func (wg *WaitGroupCount) Done() {
-	atomic.AddInt32(&wg.count, -1)
-	wg.WaitGroup.Done()
-}
-
-func (wg *WaitGroupCount) GetCount() int {
-	return int(atomic.LoadInt32(&wg.count))
 }

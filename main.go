@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	scrapper "github.com/cavitedev/go_tuto/scrapper"
+	// scrapper "github.com/cavitedev/go_tuto/scrapper"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
+	"github.com/cavitedev/go_tuto/scrapper"
 	"google.golang.org/api/option"
 )
 
