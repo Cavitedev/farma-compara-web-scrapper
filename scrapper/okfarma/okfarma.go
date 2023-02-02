@@ -1,9 +1,7 @@
 package okfarma
 
 import (
-	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -16,10 +14,6 @@ import (
 const websiteName string = "okfarma"
 const Domain string = "okfarma.es"
 
-const firstPage int = 1
-
-var lastPage int = firstPage
-
 func Scrap(ref *firestore.CollectionRef) {
 
 	log.Println(Domain)
@@ -30,46 +24,25 @@ func Scrap(ref *firestore.CollectionRef) {
 		colly.AllowedDomains(Domain),
 	)
 
-	c.OnHTML(".pagination", func(h *colly.HTMLElement) {
-		if lastPage == firstPage {
-			h.DOM.Children()
-			pageItems := h.ChildTexts("li")
-			pageStr := pageItems[len(pageItems)-2]
-			lastPageI64, err := strconv.ParseInt(pageStr, 10, 32)
-			if err != nil {
-				log.Println("Could not parse page number")
-			} else {
-				lastPage = int(lastPageI64)
-			}
-			lastPage = int(lastPageI64)
+	c.OnHTML("a.product-name", func(h *colly.HTMLElement) {
+		item := Item{}
+		pageItem := WebsiteItem{}
+		pageItem.Url = h.Attr("href")
+		scrapDetailsPage(&item, &pageItem)
+		if item.WebsiteItems == nil {
+			item.WebsiteItems = make(map[string]WebsiteItem)
 		}
+		item.WebsiteItems[websiteName] = pageItem
+		items = append(items, item)
+		firestore_utils.UpdateItem(item, ref)
+		time.Sleep(50 * time.Millisecond)
+
+		log.Printf("start \n")
+		h.Attr("class")
+
 	})
 
-	c.OnHTML("#product_list", func(h *colly.HTMLElement) {
-		log.Println("Product List")
-
-		h.ForEach(".product-container", func(_ int, e *colly.HTMLElement) {
-			item := Item{}
-			pageItem := WebsiteItem{}
-			pageItem.Url = e.ChildAttr(".product-image-container a", "href")
-			scrapDetailsPage(&item, &pageItem)
-			if item.WebsiteItems == nil {
-				item.WebsiteItems = make(map[string]WebsiteItem)
-			}
-			item.WebsiteItems[websiteName] = pageItem
-			items = append(items, item)
-			firestore_utils.UpdateItem(item, ref)
-			time.Sleep(50 * time.Millisecond)
-		})
-	})
-	for i := firstPage; i <= lastPage; i++ {
-		url := buildPageUrl(i)
-		log.Println("Visit Page", i, " url:", url)
-		err := c.Visit(url)
-		if err != nil {
-			log.Printf("Error when visiting %v, err:%v", url, err)
-		}
-	}
+	c.Visit("https://okfarma.es/higiene-corporal?id_category=14&n=10000")
 	log.Printf("Scrapped %v items", len(items))
 
 }
@@ -99,9 +72,4 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	})
 
 	c.Visit(pageItem.Url)
-}
-
-func buildPageUrl(pageNum int) string {
-	url := fmt.Sprintf("https://%v/higiene-corporal#/page-%d", Domain, pageNum)
-	return url
 }
