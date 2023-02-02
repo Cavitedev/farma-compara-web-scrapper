@@ -3,15 +3,16 @@ package firestore_utils
 import (
 	"context"
 	"log"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils/transform"
-	. "github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/scrapper/types"
 )
 
-func UpdateItem(item Item, col *firestore.CollectionRef) {
+func UpdateItem(item types.Item, col *firestore.CollectionRef) {
 	ctx := context.Background()
-	id := item.Ref
+	id := strings.Replace(item.Ref, "/", "_", -1)
 	doc := col.Doc(id)
 
 	m := transform.ToFirestoreMap(item)
@@ -19,6 +20,6 @@ func UpdateItem(item Item, col *firestore.CollectionRef) {
 	_, err := doc.Set(ctx, m, firestore.MergeAll)
 
 	if err != nil {
-		log.Panicf("Error: %v Could not insert %v\n", err, item)
+		log.Printf("Error: %v Could not insert %v\n", err, item)
 	}
 }

@@ -14,14 +14,14 @@ import (
 var client *firestore.Client
 var ctx context.Context
 
-var domain string = "www.farmaciasdirect.com"
+// var domain string = "www.farmaciasdirect.com"
+
+var domain string = "okfarma.es"
 
 func main() {
 
-	var err error
-
 	ctx = context.Background()
-	sa := option.WithCredentialsFile("secrets/firestore-sa.json")
+	sa := option.WithCredentialsFile("secrets/farma-functions-sa.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)

@@ -3,6 +3,7 @@ package farmaciasdirect
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -12,9 +13,12 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+const websiteName string = "farmaciasdirect"
 const Domain string = "www.farmaciasdirect.com"
 
-var pageNum int = 1
+const firstPage int = 104
+
+var lastPage int = firstPage
 
 func Scrap(ref *firestore.CollectionRef) {
 
@@ -24,8 +28,24 @@ func Scrap(ref *firestore.CollectionRef) {
 		colly.AllowedDomains(Domain),
 	)
 
+	c.OnError(func(r *colly.Response, err error) {
+		log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+
+	})
+
 	c.OnHTML("#js-product-list", func(h *colly.HTMLElement) {
 		log.Println("Product List")
+		if lastPage == firstPage {
+			pageItems := h.ChildTexts(".page-item")
+			pageStr := pageItems[len(pageItems)-2]
+			lastPageI64, err := strconv.ParseInt(pageStr, 10, 32)
+			if err != nil {
+				log.Println("Could not parse page number")
+			} else {
+				lastPage = int(lastPageI64)
+
+			}
+		}
 
 		h.ForEach(".card-product", func(_ int, e *colly.HTMLElement) {
 			item := Item{}
@@ -35,22 +55,31 @@ func Scrap(ref *firestore.CollectionRef) {
 			if item.WebsiteItems == nil {
 				item.WebsiteItems = make(map[string]WebsiteItem)
 			}
-			item.WebsiteItems[Domain] = pageItem
+			item.WebsiteItems[websiteName] = pageItem
 			firestore_utils.UpdateItem(item, ref)
 			time.Sleep(50 * time.Millisecond)
 		})
 	})
 
-	url := buildPageUrl()
-	c.Visit(url)
+	for i := firstPage; i <= lastPage; i++ {
+		url := buildPageUrl(i)
+		log.Println("Visit Page", i, " url:", url)
+		err := c.Visit(url)
+		if err != nil {
+			log.Printf("Error when visiting %v, err:%v", url, err)
+		}
+	}
 }
+
+var productsVisited int = 0
 
 func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)
 	c.OnResponse(func(r *colly.Response) {
-		log.Println("Visited", r.Request.URL)
+		productsVisited++
+		log.Printf("Visit %d URL:%v\n", productsVisited, r.Request.URL)
 
 	})
 
@@ -69,9 +98,9 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	c.Visit(pageItem.Url)
 }
 
-func buildPageUrl() string {
+func buildPageUrl(pageNum int) string {
 
-	url := fmt.Sprintf("https://%v/medicamentos-8?page=%v", Domain, pageNum)
+	url := fmt.Sprintf("https://%v/catalogo-2?page=%v", Domain, pageNum)
 	pageNum++
 	return url
 }

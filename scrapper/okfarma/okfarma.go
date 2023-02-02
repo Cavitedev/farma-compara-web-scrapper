@@ -1,9 +1,9 @@
 package okfarma
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -13,7 +13,12 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+const websiteName string = "okfarma"
 const Domain string = "okfarma.es"
+
+const firstPage int = 1
+
+var lastPage int = firstPage
 
 func Scrap(ref *firestore.CollectionRef) {
 
@@ -24,6 +29,21 @@ func Scrap(ref *firestore.CollectionRef) {
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
 	)
+
+	c.OnHTML(".pagination", func(h *colly.HTMLElement) {
+		if lastPage == firstPage {
+			h.DOM.Children()
+			pageItems := h.ChildTexts("li")
+			pageStr := pageItems[len(pageItems)-2]
+			lastPageI64, err := strconv.ParseInt(pageStr, 10, 32)
+			if err != nil {
+				log.Println("Could not parse page number")
+			} else {
+				lastPage = int(lastPageI64)
+			}
+			lastPage = int(lastPageI64)
+		}
+	})
 
 	c.OnHTML("#product_list", func(h *colly.HTMLElement) {
 		log.Println("Product List")
@@ -36,27 +56,33 @@ func Scrap(ref *firestore.CollectionRef) {
 			if item.WebsiteItems == nil {
 				item.WebsiteItems = make(map[string]WebsiteItem)
 			}
-			item.WebsiteItems[Domain] = pageItem
+			item.WebsiteItems[websiteName] = pageItem
 			items = append(items, item)
 			firestore_utils.UpdateItem(item, ref)
 			time.Sleep(50 * time.Millisecond)
 		})
 	})
-
-	url := buildPageUrl()
-	c.Visit(url)
-
-	bytes, _ := json.Marshal(items)
-	log.Printf("%+v\n", string(bytes))
+	for i := firstPage; i <= lastPage; i++ {
+		url := buildPageUrl(i)
+		log.Println("Visit Page", i, " url:", url)
+		err := c.Visit(url)
+		if err != nil {
+			log.Printf("Error when visiting %v, err:%v", url, err)
+		}
+	}
+	log.Printf("Scrapped %v items", len(items))
 
 }
+
+var productsVisited int = 0
 
 func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)
 	c.OnResponse(func(r *colly.Response) {
-		log.Println("Visited", r.Request.URL)
+		productsVisited++
+		log.Printf("Visit %d URL:%v\n", productsVisited, r.Request.URL)
 
 	})
 
@@ -75,8 +101,7 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	c.Visit(pageItem.Url)
 }
 
-func buildPageUrl() string {
-
-	url := fmt.Sprintf("https://%v/medicamentos", Domain)
+func buildPageUrl(pageNum int) string {
+	url := fmt.Sprintf("https://%v/higiene-corporal#/page-%d", Domain, pageNum)
 	return url
 }
