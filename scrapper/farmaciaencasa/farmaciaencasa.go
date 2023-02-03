@@ -3,6 +3,7 @@ package farmaciaencasa
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -16,7 +17,7 @@ const websiteName string = "farmaciaencasa"
 const Domain string = "www.farmaciaencasaonline.es"
 
 var lastPage int = 5
-var page int = 3
+var page int = 1
 
 func Scrap(ref *firestore.CollectionRef) {
 
@@ -27,6 +28,22 @@ func Scrap(ref *firestore.CollectionRef) {
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
 	)
+
+	c.OnResponse(func(r *colly.Response) {
+		log.Printf("Visit URL:%v\n", r.Request.URL)
+
+	})
+
+	c.OnHTML(".pages", func(h *colly.HTMLElement) {
+		pagesLi := h.ChildTexts("li>a")
+		lastPageLi := pagesLi[len(pagesLi)-2]
+		lastPageI64, err := strconv.ParseInt(lastPageLi, 10, 32)
+		if err != nil {
+			log.Println("Error parsing " + lastPageLi)
+		}
+		lastPage = int(lastPageI64)
+
+	})
 
 	c.OnHTML(".itemgrid", func(h *colly.HTMLElement) {
 
@@ -49,7 +66,7 @@ func Scrap(ref *firestore.CollectionRef) {
 	})
 
 	for page != lastPage {
-		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal-cuidado-cuerpo/?limit=60p=%v", page))
+		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal-cuidado-cuerpo-c-103_126.html?limit=60&p=%v", page))
 		page++
 	}
 
