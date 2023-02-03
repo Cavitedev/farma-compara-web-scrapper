@@ -16,7 +16,9 @@ var ctx context.Context
 
 // var domain string = "www.farmaciasdirect.com"
 
-var domain string = "okfarma.es"
+// var domain string = "okfarma.es"
+
+var domain string = "www.dosfarma.com"
 
 func main() {
 
