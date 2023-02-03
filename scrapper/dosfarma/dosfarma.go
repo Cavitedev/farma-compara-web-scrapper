@@ -74,6 +74,13 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	})
 
 	c.OnHTML("#add-to-cart-or-refresh", func(h *colly.HTMLElement) {
+
+		references := h.ChildTexts(".referencia")
+		if len(references) == 0 {
+			return
+		}
+		item.Ref = references[0]
+
 		currentTime := time.Now()
 		pageItem.LastUpdate = currentTime
 		pageItem.Image = h.ChildAttr("img", "src")
@@ -81,8 +88,12 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 
 		price := h.ChildText(".final-price")
 		pageItem.Price = utils.ParseSpanishNumberStrToNumber(price)
-		pageItem.Available = h.ChildTexts(".disponible")[0] == "En stock"
-		item.Ref = h.ChildTexts(".referencia")[0]
+
+		availableTexts := h.ChildTexts(".disponible")
+		if len(availableTexts) > 0 {
+			pageItem.Available = availableTexts[0] == "En stock"
+		}
+
 	})
 
 	c.Visit(pageItem.Url)
