@@ -37,6 +37,7 @@ func Scrap(ref *firestore.CollectionRef) {
 	c.OnHTML(".pages", func(h *colly.HTMLElement) {
 		pagesLi := h.ChildTexts("li>a")
 		lastPageLi := pagesLi[len(pagesLi)-2]
+		lastPageLi = utils.NumberRegexString(lastPageLi)
 		lastPageI64, err := strconv.ParseInt(lastPageLi, 10, 32)
 		if err != nil {
 			log.Println("Error parsing " + lastPageLi)
@@ -45,13 +46,13 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
-	c.OnHTML(".itemgrid", func(h *colly.HTMLElement) {
+	c.OnHTML(".product-items", func(h *colly.HTMLElement) {
 
-		h.ForEach(".item", func(_ int, e *colly.HTMLElement) {
+		h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
 
 			item := Item{}
 			pageItem := WebsiteItem{}
-			pageItem.Url = e.ChildAttr(".product-name>a", "href")
+			pageItem.Url = e.ChildAttr(".product", "href")
 			scrapDetailsPage(&item, &pageItem)
 			if item.WebsiteItems == nil {
 				item.WebsiteItems = make(map[string]WebsiteItem)
@@ -65,8 +66,8 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
-	for page != lastPage {
-		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal-cuidado-cuerpo-c-103_126.html?limit=60&p=%v", page))
+	for page != lastPage+1 {
+		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal/cuerpo?p=%v", page))
 		page++
 	}
 
@@ -84,9 +85,13 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 
 	})
 
-	c.OnHTML(".product-view", func(h *colly.HTMLElement) {
+	c.OnHTML(".gallery-placeholder__image", func(h *colly.HTMLElement) {
+		pageItem.Image = h.Attr("src")
+	})
 
-		references := h.ChildTexts(".sku>span>span")
+	c.OnHTML(".product-info-main", func(h *colly.HTMLElement) {
+
+		references := h.ChildTexts(".sku>div")
 		if len(references) == 0 {
 			return
 		}
@@ -94,18 +99,17 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 
 		currentTime := time.Now()
 		pageItem.LastUpdate = currentTime
-		pageItem.Image = h.ChildAttr("img", "src")
-		pageItem.Name = h.ChildText(".product-name>h1")
+		pageItem.Name = h.ChildText(".page-title>span")
 
-		price := h.ChildText(".special-price>.price")
+		price := h.ChildText(".price")
 		if price == "" {
 			price = h.ChildText(".product-type-data>div>.regular-price>.price")
 		}
 		pageItem.Price = utils.ParseSpanishNumberStrToNumber(price)
 
-		availableTexts := h.ChildTexts(".availability>span")
+		availableTexts := h.ChildTexts(".stock>span")
 		if len(availableTexts) > 0 {
-			pageItem.Available = availableTexts[0] == "En existencia"
+			pageItem.Available = availableTexts[0] == "Disponible"
 		}
 
 	})

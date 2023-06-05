@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+func NumberRegexString(str string) string {
+	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
+	var incomingNumber string = re.FindString(str)
+	return incomingNumber
+}
+
 func ParseSpanishNumberStrToNumber(str string) float64 {
 	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 	var incomingNumber string = re.FindString(str)
