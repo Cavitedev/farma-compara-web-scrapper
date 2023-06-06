@@ -28,6 +28,8 @@ func Scrap(ref *firestore.CollectionRef) {
 		colly.AllowedDomains(Domain),
 	)
 
+	c.SetRequestTimeout(30 * time.Second)
+
 	c.OnHTML("#js-product-list", func(h *colly.HTMLElement) {
 
 		itemCount = 0

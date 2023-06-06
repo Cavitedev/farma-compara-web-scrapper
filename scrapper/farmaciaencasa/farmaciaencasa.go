@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
-	"github.com/cavitedev/go_tuto/firestore_utils"
 	. "github.com/cavitedev/go_tuto/scrapper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
@@ -23,7 +22,7 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	log.Println(Domain)
 
-	items := []Item{}
+	// items := []Item{}
 	c := colly.NewCollector(
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
@@ -34,6 +33,8 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
+	c.SetRequestTimeout(30 * time.Second)
+
 	c.OnHTML(".pages", func(h *colly.HTMLElement) {
 		pagesLi := h.ChildTexts("li>a")
 		lastPageLi := pagesLi[len(pagesLi)-2]
@@ -42,29 +43,31 @@ func Scrap(ref *firestore.CollectionRef) {
 		if err != nil {
 			log.Println("Error parsing " + lastPageLi)
 		}
-		lastPage = int(lastPageI64)
+		if lastPageI64 > int64(lastPage) {
+			lastPage = int(lastPageI64)
+		}
 
 	})
 
-	c.OnHTML(".product-items", func(h *colly.HTMLElement) {
+	// c.OnHTML(".product-items", func(h *colly.HTMLElement) {
 
-		h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
+	// 	h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
 
-			item := Item{}
-			pageItem := WebsiteItem{}
-			pageItem.Url = e.ChildAttr(".product", "href")
-			scrapDetailsPage(&item, &pageItem)
-			if item.WebsiteItems == nil {
-				item.WebsiteItems = make(map[string]WebsiteItem)
-			}
-			item.WebsiteItems[websiteName] = pageItem
-			items = append(items, item)
-			firestore_utils.UpdateItem(item, ref)
-			time.Sleep(50 * time.Millisecond)
-			h.Attr("class")
-		})
+	// 		item := Item{}
+	// 		pageItem := WebsiteItem{}
+	// 		pageItem.Url = e.ChildAttr(".product", "href")
+	// 		scrapDetailsPage(&item, &pageItem)
+	// 		if item.WebsiteItems == nil {
+	// 			item.WebsiteItems = make(map[string]WebsiteItem)
+	// 		}
+	// 		item.WebsiteItems[websiteName] = pageItem
+	// 		items = append(items, item)
+	// 		firestore_utils.UpdateItem(item, ref)
+	// 		time.Sleep(50 * time.Millisecond)
+	// 		h.Attr("class")
+	// 	})
 
-	})
+	// })
 
 	for page != lastPage+1 {
 		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal/cuerpo?p=%v", page))

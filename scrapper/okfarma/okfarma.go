@@ -24,6 +24,8 @@ func Scrap(ref *firestore.CollectionRef) {
 		colly.AllowedDomains(Domain),
 	)
 
+	c.SetRequestTimeout(100 * time.Second)
+
 	c.OnHTML("a.product-name", func(h *colly.HTMLElement) {
 		item := Item{}
 		pageItem := WebsiteItem{}
