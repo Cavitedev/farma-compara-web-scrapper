@@ -18,7 +18,7 @@ func UpdateItem(item types.Item, col *firestore.CollectionRef) {
 	m1 := regexp.MustCompile(`Ref\.|p-`)
 	id = m1.ReplaceAllString(id, "")
 
-	m2 := regexp.MustCompile(`Ref\.|(\d)\.*`)
+	m2 := regexp.MustCompile(`Ref\.|(\d*)\..*`)
 
 	id = m2.ReplaceAllString(id, "$1")
 
