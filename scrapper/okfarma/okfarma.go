@@ -44,7 +44,7 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
-	c.Visit("https://okfarma.es/higiene-corporal?id_category=14&n=10000")
+	c.Visit("https://okfarma.es/higiene-corporal?id_category=14&n=10")
 	log.Printf("Scrapped %v items", len(items))
 
 }
@@ -74,4 +74,5 @@ func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
 	})
 
 	c.Visit(pageItem.Url)
+	// c.Visit("https://okfarma.es/3m-actibel-esponja-disney")
 }

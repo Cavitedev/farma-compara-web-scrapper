@@ -32,8 +32,6 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	c.OnHTML("#js-product-list", func(h *colly.HTMLElement) {
 
-		itemCount = 0
-
 		h.ForEach(".item", func(_ int, e *colly.HTMLElement) {
 
 			item := Item{}
@@ -55,8 +53,10 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
-	for itemCount > 0 {
+	for itemCount > 0 && page < 100 {
+		itemCount = 0
 		c.Visit(fmt.Sprintf("https://www.dosfarma.com/higiene/corporal/?page=%v", page))
+		time.Sleep(50 * time.Millisecond)
 		page++
 		log.Printf("Scrapped %v items on page %v", itemCount, page)
 	}

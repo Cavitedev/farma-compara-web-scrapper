@@ -16,16 +16,16 @@ var ctx context.Context
 
 // var domain string = "www.farmaciasdirect.com"
 
-var domain string = "okfarma.es"
+// var domain string = "okfarma.es"
 
-// var domain string = "www.dosfarma.com"
+var domain string = "www.dosfarma.com"
 
 // var domain string = "www.farmaciaencasaonline.es"
 
 func main() {
 
 	ctx = context.Background()
-	sa := option.WithCredentialsFile("secrets/farma-functions-sa.json")
+	sa := option.WithCredentialsFile("secrets/local-functions.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
