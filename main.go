@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -22,7 +23,21 @@ var domain string = "www.dosfarma.com"
 
 // var domain string = "www.farmaciaencasaonline.es"
 
+var scrapItems bool = true
+var scrapDelivery bool = true
+
 func main() {
+
+	//Arguments
+	if os.Args[1] != "" {
+		domain = os.Args[1]
+	}
+	if os.Args[2] != "" {
+		scrapItems = os.Args[2] == "true"
+	}
+	if os.Args[3] != "" {
+		scrapDelivery = os.Args[3] == "true"
+	}
 
 	ctx = context.Background()
 	sa := option.WithCredentialsFile("secrets/local-functions.json")
@@ -38,7 +53,7 @@ func main() {
 	defer client.Close()
 
 	fmt.Println("GO")
-	ref := client.Collection("items")
-	scrapper.Scrap(domain, ref)
+
+	scrapper.Scrap(domain, client, scrapItems, scrapDelivery)
 
 }

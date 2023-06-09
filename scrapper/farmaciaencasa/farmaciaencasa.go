@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/cavitedev/go_tuto/firestore_utils"
 	. "github.com/cavitedev/go_tuto/scrapper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
@@ -18,11 +19,11 @@ const Domain string = "www.farmaciaencasaonline.es"
 var lastPage int = 5
 var page int = 1
 
-func Scrap(ref *firestore.CollectionRef) {
+func Scrap(client *firestore.Client) {
 
 	log.Println(Domain)
 
-	// items := []Item{}
+	items := []Item{}
 	c := colly.NewCollector(
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
@@ -49,25 +50,25 @@ func Scrap(ref *firestore.CollectionRef) {
 
 	})
 
-	// c.OnHTML(".product-items", func(h *colly.HTMLElement) {
+	c.OnHTML(".product-items", func(h *colly.HTMLElement) {
 
-	// 	h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
+		h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
 
-	// 		item := Item{}
-	// 		pageItem := WebsiteItem{}
-	// 		pageItem.Url = e.ChildAttr(".product", "href")
-	// 		scrapDetailsPage(&item, &pageItem)
-	// 		if item.WebsiteItems == nil {
-	// 			item.WebsiteItems = make(map[string]WebsiteItem)
-	// 		}
-	// 		item.WebsiteItems[websiteName] = pageItem
-	// 		items = append(items, item)
-	// 		firestore_utils.UpdateItem(item, ref)
-	// 		time.Sleep(50 * time.Millisecond)
-	// 		h.Attr("class")
-	// 	})
+			item := Item{}
+			pageItem := WebsiteItem{}
+			pageItem.Url = e.ChildAttr(".product", "href")
+			scrapDetailsPage(&item, &pageItem)
+			if item.WebsiteItems == nil {
+				item.WebsiteItems = make(map[string]WebsiteItem)
+			}
+			item.WebsiteItems[websiteName] = pageItem
+			items = append(items, item)
+			firestore_utils.UpdateItem(item, client)
+			time.Sleep(50 * time.Millisecond)
+			h.Attr("class")
+		})
 
-	// })
+	})
 
 	for page != lastPage+1 {
 		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal/cuerpo?p=%v", page))

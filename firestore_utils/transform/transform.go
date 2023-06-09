@@ -39,6 +39,7 @@ func parseData(value interface{}) interface{} {
 	}
 
 	switch val.Kind() {
+
 	case reflect.Map:
 		for _, key := range val.MapKeys() {
 			val := val.MapIndex(key)

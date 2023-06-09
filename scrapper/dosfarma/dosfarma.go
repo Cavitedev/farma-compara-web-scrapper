@@ -18,7 +18,7 @@ const Domain string = "www.dosfarma.com"
 var itemCount int = 1
 var page int = 1
 
-func Scrap(ref *firestore.CollectionRef) {
+func Scrap(client *firestore.Client) {
 
 	log.Println(Domain)
 
@@ -43,7 +43,7 @@ func Scrap(ref *firestore.CollectionRef) {
 			}
 			item.WebsiteItems[websiteName] = pageItem
 			items = append(items, item)
-			firestore_utils.UpdateItem(item, ref)
+			firestore_utils.UpdateItem(item, client)
 			time.Sleep(50 * time.Millisecond)
 			h.Attr("class")
 			itemCount++

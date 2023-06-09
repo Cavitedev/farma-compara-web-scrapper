@@ -20,7 +20,7 @@ const firstPage int = 104
 
 var lastPage int = firstPage
 
-func Scrap(ref *firestore.CollectionRef) {
+func Scrap(client *firestore.Client) {
 
 	log.Println(Domain)
 	c := colly.NewCollector(
@@ -56,7 +56,7 @@ func Scrap(ref *firestore.CollectionRef) {
 				item.WebsiteItems = make(map[string]WebsiteItem)
 			}
 			item.WebsiteItems[websiteName] = pageItem
-			firestore_utils.UpdateItem(item, ref)
+			firestore_utils.UpdateItem(item, client)
 			time.Sleep(50 * time.Millisecond)
 		})
 	})

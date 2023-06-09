@@ -10,19 +10,19 @@ import (
 	"github.com/cavitedev/go_tuto/scrapper/okfarma"
 )
 
-func Scrap(website string, ref *firestore.CollectionRef) {
+func Scrap(website string, client *firestore.Client, scrapItems bool, scrapDelivery bool) {
 
 	log.Println("Hola scrapper")
 
 	switch website {
 	case okfarma.Domain:
-		okfarma.Scrap(ref)
+		okfarma.Scrap(client, scrapItems, scrapDelivery)
 	case farmaciasdirect.Domain:
-		farmaciasdirect.Scrap(ref)
+		farmaciasdirect.Scrap(client)
 	case dosfarma.Domain:
-		dosfarma.Scrap(ref)
+		dosfarma.Scrap(client)
 	case farmaciaencasa.Domain:
-		farmaciaencasa.Scrap(ref)
+		farmaciaencasa.Scrap(client)
 	}
 
 }
