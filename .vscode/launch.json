@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "main.go",
-            "args": ["www.dosfarma.com", "false", "true"]
+            "args": ["www.farmaciasdirect.com", "true", "true"]
         }
     ]
 }
