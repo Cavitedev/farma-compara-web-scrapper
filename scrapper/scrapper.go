@@ -20,7 +20,7 @@ func Scrap(website string, client *firestore.Client, scrapItems bool, scrapDeliv
 	case farmaciasdirect.Domain:
 		farmaciasdirect.Scrap(client)
 	case dosfarma.Domain:
-		dosfarma.Scrap(client)
+		dosfarma.Scrap(client, scrapItems, scrapDelivery)
 	case farmaciaencasa.Domain:
 		farmaciaencasa.Scrap(client, scrapItems, scrapDelivery)
 	}

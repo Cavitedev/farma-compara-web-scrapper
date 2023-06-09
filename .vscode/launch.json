@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "main.go",
-            "args": ["www.farmaciaencasaonline.es", "false", "true"]
+            "args": ["www.dosfarma.com", "false", "true"]
         }
     ]
 }
