@@ -8,7 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils"
-	. "github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/scrapper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
 )
@@ -20,7 +20,7 @@ func ScrapItems(client *firestore.Client) {
 
 	log.Println(Domain)
 
-	items := []Item{}
+	items := []types.Item{}
 	c := colly.NewCollector(
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
@@ -51,12 +51,12 @@ func ScrapItems(client *firestore.Client) {
 
 		h.ForEach(".product-item", func(_ int, e *colly.HTMLElement) {
 
-			item := Item{}
-			pageItem := WebsiteItem{}
+			item := types.Item{}
+			pageItem := types.WebsiteItem{}
 			pageItem.Url = e.ChildAttr(".product", "href")
 			scrapDetailsPage(&item, &pageItem)
 			if item.WebsiteItems == nil {
-				item.WebsiteItems = make(map[string]WebsiteItem)
+				item.WebsiteItems = make(map[string]types.WebsiteItem)
 			}
 			item.WebsiteItems[websiteName] = pageItem
 			items = append(items, item)
@@ -76,7 +76,7 @@ func ScrapItems(client *firestore.Client) {
 
 var productsVisited int = 0
 
-func scrapDetailsPage(item *Item, pageItem *WebsiteItem) {
+func scrapDetailsPage(item *types.Item, pageItem *types.WebsiteItem) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
 	)

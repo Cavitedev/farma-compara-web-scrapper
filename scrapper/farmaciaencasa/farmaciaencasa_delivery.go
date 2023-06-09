@@ -6,7 +6,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils"
-	. "github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/scrapper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
 )
@@ -17,9 +17,9 @@ func ScrapDelivery(client *firestore.Client) {
 
 	log.Printf("Scrappeando envíos de %v\n", Domain)
 
-	delivery := Delivery{}
+	delivery := types.Delivery{}
 	delivery.Url = deliveryUrl
-	delivery.Locations = make(map[string][]PriceRange)
+	delivery.Locations = make(map[string][]types.PriceRange)
 
 	c := colly.NewCollector(
 		colly.AllowedDomains(Domain),
@@ -35,14 +35,14 @@ func ScrapDelivery(client *firestore.Client) {
 		var keyLists [][]string = [][]string{}
 
 		//Rango de precios sin valor
-		var tmpPricesRange []PriceRange
-		var pricesRange []PriceRange
+		var tmpPricesRange []types.PriceRange
+		var pricesRange []types.PriceRange
 
 		h.ForEach("tr", func(i int, tr *colly.HTMLElement) {
 
 			//Conjutno de lugares en cada fila
 			if i == 0 || i == 4 {
-				tmpPricesRange = []PriceRange{}
+				tmpPricesRange = []types.PriceRange{}
 				tr.ForEach("th", func(j int, td *colly.HTMLElement) {
 					tmpPricesRange = HeaderRowDelivery(j, td, tmpPricesRange)
 				})
@@ -79,7 +79,7 @@ func ScrapDelivery(client *firestore.Client) {
 
 }
 
-func InnerRowDelivery(j int, td *colly.HTMLElement, pricesRange []PriceRange, keys []string) PriceRange {
+func InnerRowDelivery(j int, td *colly.HTMLElement, pricesRange []types.PriceRange, keys []string) types.PriceRange {
 
 	text := td.Text
 
@@ -120,7 +120,7 @@ func getRegions(td *colly.HTMLElement) []string {
 	}
 	return keys
 }
-func HeaderRowDelivery(j int, td *colly.HTMLElement, pricesRange []PriceRange) []PriceRange {
+func HeaderRowDelivery(j int, td *colly.HTMLElement, pricesRange []types.PriceRange) []types.PriceRange {
 	if j > 0 {
 		text := td.Text
 
@@ -138,7 +138,7 @@ func HeaderRowDelivery(j int, td *colly.HTMLElement, pricesRange []PriceRange) [
 			minPrice = utils.ParseSpanishNumberStrToNumber(splittedText[0])
 		}
 
-		pricesRange = append(pricesRange, PriceRange{
+		pricesRange = append(pricesRange, types.PriceRange{
 			Min: minPrice,
 			Max: maxPrice,
 		})
