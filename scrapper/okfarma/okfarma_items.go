@@ -34,12 +34,11 @@ func ScrapItems(client *firestore.Client) {
 		firestore_utils.UpdateItem(item, client)
 		time.Sleep(50 * time.Millisecond)
 
-		log.Printf("start \n")
 		h.Attr("class")
 
 	})
 
-	c.Visit("https://okfarma.es/higiene-corporal?id_category=14&n=10")
+	c.Visit("https://okfarma.es/higiene-corporal?id_category=14&n=10000")
 	log.Printf("Scrapped %v items", len(items))
 
 }

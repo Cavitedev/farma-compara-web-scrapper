@@ -25,9 +25,10 @@ func ScrapItems(client *firestore.Client) {
 		colly.AllowedDomains(Domain),
 	)
 
+	c.SetRequestTimeout(100 * time.Second)
+
 	c.OnError(func(r *colly.Response, err error) {
 		log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
-
 	})
 
 	c.OnHTML("#js-product-list", func(h *colly.HTMLElement) {
