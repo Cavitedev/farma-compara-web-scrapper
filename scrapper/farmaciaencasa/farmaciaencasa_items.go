@@ -18,8 +18,6 @@ var page int = 1
 
 func ScrapItems(client *firestore.Client) {
 
-	log.Println(Domain)
-
 	items := []types.Item{}
 
 	// Instanciar colly para que navegue por ese dominio

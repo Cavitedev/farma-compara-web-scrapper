@@ -17,8 +17,6 @@ var page int = 1
 
 func ScrapItems(client *firestore.Client) {
 
-	log.Println(Domain)
-
 	items := []Item{}
 	c := colly.NewCollector(
 		// colly.Async(true),

@@ -29,13 +29,13 @@ var scrapDelivery bool = true
 func main() {
 
 	//Arguments
-	if os.Args[1] != "" {
+	if len(os.Args) > 1 {
 		domain = os.Args[1]
 	}
-	if os.Args[2] != "" {
+	if len(os.Args) > 2 {
 		scrapItems = os.Args[2] == "true"
 	}
-	if os.Args[3] != "" {
+	if len(os.Args) > 3 {
 		scrapDelivery = os.Args[3] == "true"
 	}
 

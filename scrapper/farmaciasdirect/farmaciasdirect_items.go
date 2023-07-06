@@ -19,7 +19,6 @@ var lastPage int = firstPage
 
 func ScrapItems(client *firestore.Client) {
 
-	log.Println(Domain)
 	c := colly.NewCollector(
 		// colly.Async(true),
 		colly.AllowedDomains(Domain),
