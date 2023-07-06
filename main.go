@@ -15,6 +15,8 @@ import (
 var client *firestore.Client
 var ctx context.Context
 
+// Comentar y descomentar para elegir el dominio si no se usan parámetros
+
 // var domain string = "www.farmaciasdirect.com"
 
 // var domain string = "okfarma.es"
