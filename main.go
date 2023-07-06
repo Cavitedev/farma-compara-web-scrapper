@@ -8,7 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	"github.com/cavitedev/go_tuto/scrapper"
+	scraper "github.com/cavitedev/go_tuto/scraper"
 	"google.golang.org/api/option"
 )
 
@@ -54,6 +54,6 @@ func main() {
 
 	fmt.Println("GO")
 
-	scrapper.Scrap(domain, client, scrapItems, scrapDelivery)
+	scraper.Scrap(domain, client, scrapItems, scrapDelivery)
 
 }

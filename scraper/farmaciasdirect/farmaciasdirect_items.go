@@ -8,7 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils"
-	. "github.com/cavitedev/go_tuto/scrapper/types"
+	. "github.com/cavitedev/go_tuto/scraper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
 )

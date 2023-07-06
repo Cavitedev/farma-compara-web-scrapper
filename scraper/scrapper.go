@@ -1,18 +1,18 @@
-package scrapper
+package scraper
 
 import (
 	"log"
 
 	"cloud.google.com/go/firestore"
-	"github.com/cavitedev/go_tuto/scrapper/dosfarma"
-	"github.com/cavitedev/go_tuto/scrapper/farmaciaencasa"
-	"github.com/cavitedev/go_tuto/scrapper/farmaciasdirect"
-	"github.com/cavitedev/go_tuto/scrapper/okfarma"
+	"github.com/cavitedev/go_tuto/scraper/dosfarma"
+	"github.com/cavitedev/go_tuto/scraper/farmaciaencasa"
+	"github.com/cavitedev/go_tuto/scraper/farmaciasdirect"
+	"github.com/cavitedev/go_tuto/scraper/okfarma"
 )
 
 func Scrap(website string, client *firestore.Client, scrapItems bool, scrapDelivery bool) {
 
-	log.Println("Hola scrapper")
+	log.Println("Hola scraper")
 
 	switch website {
 	case okfarma.Domain:

@@ -1,4 +1,4 @@
-package farmaciaencasa
+package dosfarma
 
 import (
 	"log"
@@ -6,13 +6,14 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils"
-	"github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/scraper/types"
 	"github.com/cavitedev/go_tuto/utils"
 	"github.com/gocolly/colly/v2"
 )
 
-var deliveryUrl = "https://www.farmaciaencasaonline.es/farmacia-en-casa-online-tarifas-y-condiciones-de-envio"
+var deliveryUrl = "https://www.dosfarma.com/envios"
 
+// Solo saca los datos de península cuando pesa menos de 20 KG
 func ScrapDelivery(client *firestore.Client) {
 
 	log.Printf("Scrappeando envíos de %v\n", Domain)
@@ -27,49 +28,36 @@ func ScrapDelivery(client *firestore.Client) {
 
 	var executed bool = false
 
-	c.OnHTML(".main>div>table>tbody", func(h *colly.HTMLElement) {
+	c.OnHTML("table.MsoTableGrid>tbody", func(h *colly.HTMLElement) {
 
 		if executed {
 			return
 		}
-		var keyLists [][]string = [][]string{}
 
-		//Rango de precios sin valor
-		var tmpPricesRange []types.PriceRange
-		var pricesRange []types.PriceRange
+		var pricesRange []types.PriceRange = []types.PriceRange{}
 
 		h.ForEach("tr", func(i int, tr *colly.HTMLElement) {
 
-			//Conjutno de lugares en cada fila
-			if i == 0 || i == 4 {
-				tmpPricesRange = []types.PriceRange{}
-				tr.ForEach("th", func(j int, td *colly.HTMLElement) {
-					tmpPricesRange = HeaderRowDelivery(j, td, tmpPricesRange)
-				})
-			} else {
-				var keys []string
+			if i == 1 {
+
 				tr.ForEach("td", func(j int, td *colly.HTMLElement) {
-
-					if j == 0 {
-						keys = getRegions(td)
-						keyLists = append(keyLists, keys)
-					} else {
-						addPriceRange := InnerRowDelivery(j, td, tmpPricesRange, keys)
-
-						pricesRange = append(pricesRange, addPriceRange)
-
+					if j == 3 {
+						price := PriceFromTableCell(td)
+						pricesRange = append(pricesRange, types.PriceRange{Price: price, Min: 0, Max: 49})
+					}
+				})
+			} else if i == 2 {
+				tr.ForEach("td", func(j int, td *colly.HTMLElement) {
+					if j == 1 {
+						price := PriceFromTableCell(td)
+						pricesRange = append(pricesRange, types.PriceRange{Price: price, Min: 49.01})
 					}
 				})
 			}
 
 		})
-
-		for i, keyList := range keyLists {
-			for _, key := range keyList {
-				delivery.Locations[key] = pricesRange[i*3 : i*3+3]
-			}
-		}
-
+		delivery.Locations["spain"] = pricesRange
+		delivery.Locations["portugal"] = pricesRange
 		executed = true
 	})
 
@@ -77,6 +65,17 @@ func ScrapDelivery(client *firestore.Client) {
 
 	firestore_utils.UpdateDelivery(delivery, client, websiteName)
 
+}
+
+func PriceFromTableCell(td *colly.HTMLElement) float64 {
+	text := td.Text
+
+	var price float64
+
+	if utils.IsNumber(text) {
+		price = utils.ParseSpanishNumberStrToNumber(text)
+	}
+	return price
 }
 
 func InnerRowDelivery(j int, td *colly.HTMLElement, pricesRange []types.PriceRange, keys []string) types.PriceRange {

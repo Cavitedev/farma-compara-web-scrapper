@@ -8,7 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/cavitedev/go_tuto/firestore_utils/transform"
-	"github.com/cavitedev/go_tuto/scrapper/types"
+	"github.com/cavitedev/go_tuto/scraper/types"
 )
 
 func UpdateItem(item types.Item, client *firestore.Client) {
