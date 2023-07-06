@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -53,8 +52,6 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer client.Close()
-
-	fmt.Println("GO")
 
 	scraper.Scrap(domain, client, scrapItems, scrapDelivery)
 

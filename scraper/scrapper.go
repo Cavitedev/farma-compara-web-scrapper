@@ -12,7 +12,7 @@ import (
 
 func Scrap(website string, client *firestore.Client, scrapItems bool, scrapDelivery bool) {
 
-	log.Println("Hola scraper")
+	log.Println("Inicializando scraper")
 
 	switch website {
 	case okfarma.Domain:
