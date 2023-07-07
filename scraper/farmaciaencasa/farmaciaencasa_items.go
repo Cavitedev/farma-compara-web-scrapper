@@ -80,6 +80,7 @@ func ScrapItems(client *firestore.Client) {
 	// iterar por todas las páginas
 	for page != lastPage+1 {
 		c.Visit(fmt.Sprintf("https://www.farmaciaencasaonline.es/corporal/cuerpo?p=%v", page))
+		time.Sleep(50 * time.Millisecond)
 		page++
 	}
 

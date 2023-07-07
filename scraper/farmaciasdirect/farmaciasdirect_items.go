@@ -62,6 +62,7 @@ func ScrapItems(client *firestore.Client) {
 		url := buildPageUrl(i)
 		log.Println("Visit Page", i, " url:", url)
 		err := c.Visit(url)
+		time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			log.Printf("Error when visiting %v, err:%v", url, err)
 		}
