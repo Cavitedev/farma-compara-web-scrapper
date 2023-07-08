@@ -23,6 +23,13 @@ func Scrap(website string, client *firestore.Client, scrapItems bool, scrapDeliv
 		dosfarma.Scrap(client, scrapItems, scrapDelivery)
 	case farmaciaencasa.Domain:
 		farmaciaencasa.Scrap(client, scrapItems, scrapDelivery)
+	case "all":
+		okfarma.Scrap(client, scrapItems, scrapDelivery)
+		farmaciasdirect.Scrap(client, scrapItems, scrapDelivery)
+		dosfarma.Scrap(client, scrapItems, scrapDelivery)
+		farmaciaencasa.Scrap(client, scrapItems, scrapDelivery)
+	default:
+		log.Fatalf("No se ha encontrado la página \"%v\" para scrappear los datos\n", website)
 	}
 
 }

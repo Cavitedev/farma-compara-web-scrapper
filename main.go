@@ -1,3 +1,28 @@
+/*
+=== Documentación de la línea de comandos ===
+
+Este programa acepta los siguientes argumentos de la línea de comandos:
+
+- Dominio: Dominio de la página web. Elegir entre: okfarma.es, www.farmaciasdirect.com, www.dosfarma.com, www.farmaciaencasaonline.es y all (para todas las páginas web)
+- ScrappearProductos: true si se quiere scrappear los productos, falso en cualquier otro caso
+- ScrappearPreciosEnvio: true si se quiere scrappear los precios de envío, falso en cualquier otro caso
+
+Por defecto se utilizan las variables preasignadas
+
+Para ejecutar el programa, utiliza la siguiente sintaxis:
+
+    go run main.go  [Dominio] [ScrappearProductos] [ScrappearPreciosEnvio]
+
+Ejemplos de uso:
+
+    go run main.go
+
+    go run main.go all
+
+	go run main.go okfarma.es true false
+=========================================
+*/
+
 package main
 
 import (
@@ -23,6 +48,8 @@ var ctx context.Context
 var domain string = "www.dosfarma.com"
 
 // var domain string = "www.farmaciaencasaonline.es"
+
+// var domain string = "all"
 
 var scrapItems bool = true
 var scrapDelivery bool = true
